@@ -34,12 +34,15 @@ if [ mode == "blink" ]; then
     setblink(frequency)
 fi
 
+
 if [ "$led" = "all" ]; then
     for i in {0..3}
     do
+        mapmode(mode, i)
         echo $mode > /sys/class/leds/beaglebone:green:usr$i/trigger
     done
 else
+    mapmode(mode,0)
     echo $mode > /sys/class/leds/beaglebone:green:$led/trigger
 fi
 
@@ -55,9 +58,35 @@ function displayhelp {
     exit 1
 }
 
-function setblink(frequency) {
-    echo "blink" > /sys/class/leds/beaglebone:green:$led/trigger
-    echo "100" > /sys/class/leds/beaglebone:green:$led/delay_on
-    echo "100" > /sys/class/leds/beaglebone:green:$led/delay_off
+function setblink (frequency) {
+    delay=(1000/$frequency)/2
+    echo "timer" > /sys/class/leds/beaglebone:green:$led/trigger
+    echo "$delay" > /sys/class/leds/beaglebone:green:$led/delay_on
+    echo "$delay" > /sys/class/leds/beaglebone:green:$led/delay_off
     exit 0
+}
+
+function mapmode (mode, i) {
+    case $mode in
+        "on")
+            mode = "default-on"
+            ;;
+        "off")
+            mode = "none"
+            ;;
+        "heartbeat")
+            mode = "heartbeat"
+            ;;
+        "default")
+                if i==0
+                    mode = "heartbeat"
+                elif i==1
+                    mode = "mmc0"
+                elif i==2
+                    mode = "cpu0"
+                elif i==3
+                    mode = "mmc1"
+                fi
+            ;;
+    esac
 }
