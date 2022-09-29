@@ -92,6 +92,7 @@ fi
 
 if [ mode == "blink" ]; then
     frequency=$3
+    mapled
     setblink frequency
 fi
 
