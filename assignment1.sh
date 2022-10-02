@@ -1,5 +1,7 @@
 #!/bin/bash
 # Command line arguments: $1 = led type :"led0", "led1", "led2", "led3", "all", $2 = mode: "on", "off", "heartbeat", "blink", "default" (
+#Marton Pentek 293649 | Matey Matev 285041
+
 
 arg1=("led0" "led1" "led2" "led3" "all")
 arg2=("on" "off" "heartbeat" "blink" "default")
@@ -40,33 +42,26 @@ mapled () {
     esac
 }
 
-get_led_path() {
-    local led="$1"
-    echo "${led/led/usr}"
-}
-
-var="$(get_let_path "$led")"
-
 mapmode () {
     case $1 in
         "on")
-            $mode = "default-on"
+            mode="default-on"
             ;;
         "off")
-            $mode = "none"
+            mode="none"
             ;;
         "heartbeat")
-            $mode = "heartbeat"
+            mode="heartbeat"
             ;;
         "default")
                 if [ "$2" -eq 0 ]; then
-                    $mode = "heartbeat"
+                    mode="heartbeat"
                 elif [ "$2" -eq 1 ]; then
-                    $mode = "mmc0"
+                    mode="mmc0"
                 elif [ "$2" -eq 2 ]; then
-                    $mode = "cpu0"
+                    mode="cpu0"
                 elif [ "$2" -eq 3 ]; then
-                    $mode = "mmc1"
+                    mode="mmc1"
                 fi
             ;;
     esac
@@ -81,7 +76,7 @@ for i in "$@"; do
   esac
 done
 
-if [ "$#" -ne 2 ]; then
+if [ "$#" -lt 2 ]; then
     echo "Error: Invalid number of arguments" 1>&2
     displayhelp 1>&2
 fi
@@ -112,5 +107,9 @@ if [ "$led" = "all" ]; then
 else
     mapmode "$mode" 0
     mapled
-    echo $mode > /sys/class/leds/beaglebone:green:$led/trigger
+    if [ "$mode" = "blink" ]; then
+        setblink "$frequency"
+    else
+        echo $mode > /sys/class/leds/beaglebone:green:$led/trigger
+    fi
 fi
